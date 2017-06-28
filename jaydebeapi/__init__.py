@@ -493,13 +493,14 @@ class Cursor(object):
         if self._connection._closed:
             raise Error()
         self._close_last()
-        if not parameters:
-            self._prep = self._connection.jconn.createStatement(operation)
-        else:
-            self._prep = self._connection.jconn.prepareStatement(operation)
-            self._set_stmt_parms(self._prep, parameters)
         try:
-            is_rs = self._prep.execute()
+            if not parameters:
+                self._prep = self._connection.jconn.createStatement()
+                is_rs = self._prep.execute(operation)
+            else:
+                self._prep = self._connection.jconn.prepareStatement(operation)
+                self._set_stmt_parms(self._prep, parameters)
+                is_rs = self._prep.execute()
         except:
             _handle_sql_exception()
         if is_rs:
